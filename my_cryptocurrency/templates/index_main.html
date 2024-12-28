@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipcoin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">
+            <img src="../static/pipcoin.png" alt="logo" style="height: 50px; margin-right: 10px;">
+            Pipcoin Transactions
+        </h1>   
+
+        <!-- Add Transaction Form -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Add a Pipcoin Transaction</h3>
+                <form id="transactionForm">
+                    <div class="mb-3">
+                        <label for="sender" class="form-label">Sender</label>
+                        <input type="text" class="form-control" id="sender" placeholder="Enter sender's name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="receiver" class="form-label">Receiver</label>
+                        <input type="text" class="form-control" id="receiver" placeholder="Enter receiver's name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" placeholder="Enter amount" required>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="addTransaction">
+                        <i class="bi bi-plus-circle"></i> Add Transaction
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Blockchain Actions -->
+        <div class="text-center mt-4">
+            <button class="btn btn-success me-2" id="mineBlock">
+                <i class="bi bi-hammer"></i> Mine Block
+            </button>
+            <button class="btn btn-info me-2" id="viewChain" data-bs-toggle="modal" data-bs-target="#viewChainModal">
+                <i class="bi bi-link-45deg"></i> View Blockchain
+            </button>
+            <button class="btn btn-warning" id="validateChain">
+                <i class="bi bi-shield-check"></i> Validate Blockchain
+            </button>
+        </div>
+
+        <div class="modal fade" id="viewChainModal" tabindex="-1" aria-labelledby="viewChainModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewChainModalLabel">Blockchain Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="blockchainData" class="bg-light p-3 rounded" style="max-height: 500px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="mt-4" id="output"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add Transaction
+        document.getElementById("addTransaction").addEventListener("click", () => {
+            const sender = document.getElementById("sender").value;
+            const receiver = document.getElementById("receiver").value;
+            const amount = document.getElementById("amount").value;
+
+            fetch("/add_transaction", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sender, receiver, amount }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output").innerText = data.message;
+            });
+        });
+
+        // Mine Block
+        document.getElementById("mineBlock").addEventListener("click", () => {
+            fetch("/mine_block")
+                .then(response => response.json())
+                .then(data => {
+                    const message = `Block Mined:\n\n${JSON.stringify(data, null, 2)}`;
+                    document.getElementById("output").innerText = message;
+                });
+        });
+
+        // View Blockchain
+        document.getElementById("viewChain").addEventListener("click", () => {
+            fetch("/get_chain")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("blockchainData").innerText = JSON.stringify(data, null, 2);
+                });
+        });
+
+        // Validate Blockchain
+        document.getElementById("validateChain").addEventListener("click", () => {
+            fetch("/is_valid")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("output").innerText = data.message;
+                });
+        });
+    </script>
+</body>
+</html>
