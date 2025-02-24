@@ -85,13 +85,19 @@ def mine_block():
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
-    blockchain.add_transactions(sender="System", receiver=str(uuid4()), amount=1)
+    miner_address = str(uuid4())  # Unique address for the miner
+    blockchain.add_transactions(sender="System", receiver=miner_address, amount=1)
     block = blockchain.create_block(proof, previous_hash)
     response = {
         "message": "Congratulations, you just mined a block!",
-        "block": block
+        "block": block,
+        "reward_transaction": {
+            "sender": "System",
+            "receiver": miner_address,
+            "amount": 1
+        }
     }
-    return jsonify(response), 200   
+    return jsonify(response), 200  
 
 @app.route("/get_chain", methods=["GET"])
 def get_chain():
